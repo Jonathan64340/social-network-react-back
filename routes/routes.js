@@ -64,7 +64,11 @@ router.post('/api/v1/refreshToken', (req, res, next) => {
 // User
 router.get('/api/v1/user/me', Core.authenticateJWT, async function (req, res) {
   if (req.headers.authorization) {
-    res.status(200).send(await User.getMe({ token: req.headers.authorization.split(' ')[1] }));
+    await User.getMe({ token: req.headers.authorization.split(' ')[1] })
+    .then(user => {
+      res.status(200).send(user)
+    })
+    .catch(() => res.sendStatus(401))
   }
 });
 // End user

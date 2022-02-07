@@ -73,7 +73,6 @@ router.get('/api/v1/user/me', Core.authenticateJWT, async function (req, res) {
 router.post('/api/v1/publication', Core.authenticateJWT, async function (req, res) {
   Publication.create(req.body)
     .then((result) => {
-      console.log(result)
       res.status(200).send({
         text: 'publication.notification.new.success',
         ...result
@@ -83,27 +82,30 @@ router.post('/api/v1/publication', Core.authenticateJWT, async function (req, re
 })
 
 router.patch('/api/v1/publication/edit/:id', Core.authenticateJWT, async function (req, res) {
-  Publication.create(req.body)
-    .then(() => {
-      res.status(200).send('publication.notification.edit.success')
+  Publication.edit(req.body)
+    .then((result) => {
+      res.status(200).send({
+        text: 'publication.notification.edit.success',
+        ...result
+      })
     })
     .catch(() => res.status(500).send({}))
 })
 
 router.get('/api/v1/publication', Core.authenticateJWT, async function (req, res) {
   Publication.get(req.query)
-  .then((publications) => {
-    res.status(200).send(publications)
-  })
-  .catch(() => res.status(500).send({}))
+    .then((publications) => {
+      res.status(200).send(publications)
+    })
+    .catch(() => res.status(500).send({}))
 })
 
 router.delete('/api/v1/publication', Core.authenticateJWT, async function (req, res) {
   Publication.delete(req.query)
-  .then(() => {
-    res.sendStatus(200)
-  })
-  .catch(() => res.sendStatus(500))
+    .then(() => {
+      res.sendStatus(200)
+    })
+    .catch(() => res.sendStatus(500))
 })
 // End publication
 

@@ -55,10 +55,44 @@ class Publication extends Core {
 
     async edit(payload) {
         return new Promise(async (resolve, reject) => {
-            if (!payload.ownerId) return reject('Missing parameters');
-            await this.collection.updateOne({ _id: ObjectId(payload.id) }, { $set: { ...payload } });
-
-            resolve();
+            if (!payload._id) return reject('Missing parameters');
+            const pId = payload._id;
+            await this.collection.updateOne({ _id: ObjectId(payload._id) }, { $set: { ...(delete payload._id && delete payload.ownerId && { ...payload }), modifiedAt: new Date().getTime() } });
+            resolve(await aggregation(this.collection, [
+                {
+                    "$match": {
+                        "$expr": { "$eq": [ObjectId(pId), "$_id"] }
+                    }
+                },
+                {
+                    "$lookup": {
+                        "from": "users",
+                        "let": { "id": "$ownerId" },
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$eq": ["$_id", "$$id"]
+                                    }
+                                }
+                            },
+                            {
+                                "$project": {
+                                    "password": 0,
+                                    "registration_date": 0,
+                                    "modifiedAt": 0,
+                                    "email": 0,
+                                    "createdAt": 0
+                                }
+                            }
+                        ],
+                        "as": "user"
+                    },
+                },
+                {
+                    "$unwind": "$user"
+                }
+            ]).sort({ createdAt: -1 }).toArray());
         })
     }
 

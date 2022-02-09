@@ -5,11 +5,13 @@ const _auth = require('../controllers/auth/authCtrl');
 const _core = require('../controllers/core/coreCtrl');
 const _user = require('../controllers/user/UserCtrl');
 const _publication = require('../controllers/publication/publication');
+const _comments = require('../controllers/publication/comments');
 const beautifierConsole = require('../utils/beautifierConsole');
 const Auth = new _auth();
 const Core = new _core();
 const User = new _user();
 const Publication = new _publication();
+const Comments = new _comments();
 const _io = require('../socket/socket.class');
 let socket = null;
 
@@ -17,6 +19,7 @@ const init = (db, io) => {
   Auth.init(db);
   User.init(db);
   Publication.init(db);
+  Comments.init(db);
   if (io) socket = io;
 
   // Define socket
@@ -45,11 +48,6 @@ router.post('/api/v1/auth/register', function (req, res) {
 });
 
 router.post('/api/v1/auth/password-recover', function (req, res) {
-
-});
-
-// Tokens
-router.post('/api/v1/auth/token', function (req, res) {
 
 });
 
@@ -111,6 +109,25 @@ router.delete('/api/v1/publication', Core.authenticateJWT, async function (req, 
     })
     .catch(() => res.sendStatus(500))
 })
+
+// Publication comments
+router.post('/api/v1/publication/comment/new', Core.authenticateJWT, async function (req, res) {
+  Comments.create(req.body)
+    .then((comment) => {
+      res.status(200).send(comment)
+    })
+    .catch(() => res.sendStatus(500))
+})
+
+router.delete('/api/v1/publication/comment/delete', Core.authenticateJWT, async function (req, res) {
+  Comments.delete(req.query)
+    .then((comment) => {
+      res.status(200).send(comment)
+    })
+    .catch(() => res.sendStatus(500))
+})
+
+// End publication comments
 // End publication
 
 module.exports.init = init;

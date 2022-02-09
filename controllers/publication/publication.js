@@ -88,9 +88,6 @@ class Publication extends Core {
                         ],
                         "as": "user"
                     },
-                },
-                {
-                    "$unwind": "$user"
                 }
             ]).sort({ createdAt: -1 }).toArray());
         })
@@ -142,7 +139,40 @@ class Publication extends Core {
                 },
                 {
                     "$unwind": "$user"
-                }
+                },
+                {
+                    "$lookup": {
+                        "from": "comments",
+                        "localField": "_id",
+                        "foreignField": "publicationId",
+                        "as": "comments.data",
+                    },
+                },
+                {
+                    "$lookup": {
+                        "from": "users",
+                        "let": { "id": "$comments.data.ownerId" },
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$in": ["$_id", "$$id"]
+                                    }
+                                }
+                            },
+                            {
+                                "$project": {
+                                    "password": 0,
+                                    "registration_date": 0,
+                                    "modifiedAt": 0,
+                                    "email": 0,
+                                    "createdAt": 0
+                                }
+                            },
+                        ],
+                        "as": "comments.user"
+                    },
+                },
             ]).sort({ createdAt: -1 }).toArray());
         })
     }

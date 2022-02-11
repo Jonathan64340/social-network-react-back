@@ -88,6 +88,9 @@ class Publication extends Core {
                         ],
                         "as": "user"
                     },
+                },
+                {
+                    "$unwind": "$user"
                 }
             ]).sort({ createdAt: -1 }).toArray());
         })

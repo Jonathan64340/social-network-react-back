@@ -127,6 +127,14 @@ router.delete('/api/v1/publication/comment/delete', Core.authenticateJWT, async 
     .catch(() => res.sendStatus(500))
 })
 
+router.patch('/api/v1/publication/comment/edit/:id', Core.authenticateJWT, async function (req, res) {
+  Comments.edit(req.body)
+    .then((comment) => {
+      res.status(200).send(comment)
+    })
+    .catch(() => res.sendStatus(500))
+})
+
 // End publication comments
 // End publication
 

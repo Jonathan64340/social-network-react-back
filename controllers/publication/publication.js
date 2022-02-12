@@ -115,6 +115,8 @@ class Publication extends Core {
                         "$expr": { "$eq": [ObjectId(payload.ownerId), "$ownerId"] }
                     }
                 },
+                { "$sort": { "createdAt": -1 } },
+                { "$limit": 25 },
                 {
                     "$lookup": {
                         "from": "users",
@@ -146,9 +148,20 @@ class Publication extends Core {
                 {
                     "$lookup": {
                         "from": "comments",
-                        "localField": "_id",
-                        "foreignField": "publicationId",
+                        "let": { "id": "$_id" },
                         "as": "comments.data",
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$eq": ["$$id", "$publicationId"]
+                                    }
+                                }
+                            },
+                            {
+                                "$limit": 25
+                            }
+                        ]
                     },
                 },
                 {

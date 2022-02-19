@@ -138,5 +138,22 @@ router.patch('/api/v1/publication/comment/edit/:id', Core.authenticateJWT, async
 // End publication comments
 // End publication
 
+// Global user interact
+router.get('/api/v1/user-list', Core.authenticateJWT, async function (req, res) {
+   User.getUserList(req.query)
+    .then((userList) => {
+      res.status(200).send(userList)
+    })
+    .catch(() => res.sendStatus(404))
+})
+
+router.get('/api/v1/user', Core.authenticateJWT, async function (req, res) {
+  User.getUser(req.query)
+   .then((userList) => {
+     res.status(200).send(userList)
+   })
+   .catch(() => res.sendStatus(404))
+})
+
 module.exports.init = init;
 module.exports.router = router;

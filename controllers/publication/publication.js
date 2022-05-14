@@ -107,12 +107,13 @@ class Publication extends Core {
     async get(payload) {
         return new Promise(async (resolve, reject) => {
             if (!payload.ownerId) return reject('Missing parameters #publication.js get function');
-
+            const ownerId = ObjectId.isValid(payload.ownerId) ? ObjectId(payload.ownerId) : null;
+            if (!ownerId) return reject();
             // Retrieve data from post with meta data of user owner
             resolve(await aggregation(this.collection, [
                 {
                     "$match": {
-                        "$expr": { "$eq": [ObjectId(payload.ownerId), "$ownerId"] }
+                        "$expr": { "$eq": [ownerId, "$ownerId"] }
                     }
                 },
                 { "$sort": { "createdAt": -1 } },

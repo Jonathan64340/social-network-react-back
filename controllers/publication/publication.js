@@ -112,8 +112,27 @@ class Publication extends Core {
             // Retrieve data from post with meta data of user owner
             resolve(await aggregation(this.collection, [
                 {
+                    "$unwind": "$wall"
+                },
+                {
                     "$match": {
-                        "$expr": { "$eq": [ownerId, "$ownerId"] }
+                        "$expr": {
+                            "$or": [
+                                {
+                                    "$eq": [payload.ownerId, "$wall._id"] // Get publication posted by friend into my wall
+                                },
+                                {
+                                    "$and": [
+                                        {
+                                            "$eq": [ownerId, "$ownerId"]
+                                        },
+                                        {
+                                            "$eq": [payload.ownerId, "$wall._id"]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
                     }
                 },
                 { "$sort": { "createdAt": -1 } },

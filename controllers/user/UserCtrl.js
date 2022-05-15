@@ -13,7 +13,9 @@ class User extends Core {
 
     async getMe(data) {
         const identifier = await this.jwtDecode({ token: data.token });
-        return await this.collection.findOne({ _id: ObjectId(identifier._id) }, { projection: { "password": 0, "createdAt": 0, "modifiedAt": 0 } })
+        const identifierId = ObjectId.isValid(identifier._id) ? ObjectId(identifier._id) : null;
+        if (!identifierId) return reject();
+        return await this.collection.findOne({ _id: identifierId }, { projection: { "password": 0, "createdAt": 0, "modifiedAt": 0 } })
     }
 
     async getUserList({ query }) {

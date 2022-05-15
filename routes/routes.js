@@ -6,12 +6,15 @@ const _core = require('../controllers/core/coreCtrl');
 const _user = require('../controllers/user/UserCtrl');
 const _publication = require('../controllers/publication/publication');
 const _comments = require('../controllers/publication/comments');
+const _friends = require('../controllers/friend/friend');
 const beautifierConsole = require('../utils/beautifierConsole');
+
 const Auth = new _auth();
 const Core = new _core();
 const User = new _user();
 const Publication = new _publication();
 const Comments = new _comments();
+const Friends = new _friends();
 const _io = require('../socket/socket.class');
 let socket = null;
 
@@ -137,6 +140,20 @@ router.patch('/api/v1/publication/comment/edit/:id', Core.authenticateJWT, async
 
 // End publication comments
 // End publication
+
+// Friend
+router.post('/api/v1/sendFriendRequest', Core.authenticateJWT, async function (req, res) {
+  
+})
+
+router.get('/api/v1/getFriendRequest', Core.authenticateJWT, async function (req, res) {
+  
+})
+
+router.post('/api/v1/friendRequestAction', Core.authenticateJWT, async function (req, res) {
+  
+})
+// End friend
 
 // Global user interact
 router.get('/api/v1/user-list', Core.authenticateJWT, async function (req, res) {

@@ -56,8 +56,9 @@ class Publication extends Core {
     async edit(payload) {
         return new Promise(async (resolve, reject) => {
             if (!payload._id) return reject('Missing parameters');
-            const pId = payload._id;
-            await this.collection.updateOne({ _id: ObjectId(payload._id) }, { $set: { ...(delete payload._id && delete payload.ownerId && { ...payload }), modifiedAt: new Date().getTime() } });
+            const pId = ObjectId.isValid(payload._id) ? ObjectId(payload._id) : null;
+            if (!ownerId) return reject();
+            await this.collection.updateOne({ _id: ObjectId(pId) }, { $set: { ...(delete payload._id && delete payload.ownerId && { ...payload }), modifiedAt: new Date().getTime() } });
             resolve(await aggregation(this.collection, [
                 {
                     "$match": {

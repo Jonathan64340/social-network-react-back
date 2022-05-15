@@ -8,8 +8,46 @@ class Friend extends Core {
 
     init(db) {
         this.db = db;
-        this.collection = this.db.collection('friends');
-        this.friendsRequestsCollection = this.db.collection('friendsRequests');
+        this.collection = this.db.collection('friendsRequests');
+    }
+
+    sendFriendRequest({ senderId, receiverId, status }) {
+        return new Promise(async (resolve, reject) => {
+            if (!senderId || !receiverId || !status) return reject();
+
+            const { insertedId } = await this.collection.insertOne({ senderId, receiverId, status: 'pending', createdAt: new Date().getTime() }, { upsert: true, returnDocument: 'after' });
+            const friendRequestData = await this.collection.findOne({ _id: insertedId });
+            resolve(friendRequestData);
+        })
+    }
+
+    getFriendRequest({ userId, to }) {
+        return new Promise(async (resolve, reject) => {
+            if (!userId || !to) return reject();
+            const friendRequest = await this.collection.findOne({ $or: [{ senderId: userId, receiverId: to }, { senderId: to, receiverId: userId }] }, { $orderby: { createdAt: -1 }});
+            resolve(friendRequest);
+        })
+    }
+
+    replyFriendRequest({ id, senderId, receiverId, status }) {
+        return new Promise(async (resolve, reject) => {
+            if (!id || !senderId || !receiverId || !status) return reject();
+            if (status === 'pending' || status === 'decline' || status === 'accept') {
+                const pId = ObjectId.isValid(id) ? ObjectId(id) : null;
+                if (!pId) return reject();
+
+                if (status === 'decline') {
+                    await this.collection.deleteOne({ _id: pId });
+                    resolve({ status: 'decline'});
+                }
+
+                await this.collection.updateOne({ _id: pId }, { $set: { status } });
+                const result = await this.collection.findOne({ _id: pId });
+                resolve(result);
+            } else {
+                reject()
+            }
+        })
     }
 }
 

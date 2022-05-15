@@ -23,6 +23,7 @@ const init = (db, io) => {
   User.init(db);
   Publication.init(db);
   Comments.init(db);
+  Friends.init(db);
   if (io) socket = io;
 
   // Define socket
@@ -143,15 +144,27 @@ router.patch('/api/v1/publication/comment/edit/:id', Core.authenticateJWT, async
 
 // Friend
 router.post('/api/v1/sendFriendRequest', Core.authenticateJWT, async function (req, res) {
-  
+  Friends.sendFriendRequest(req.body)
+  .then((friend) => {
+    res.status(200).send(friend);
+  })
+  .catch(() => res.sendStatus(404))
 })
 
 router.get('/api/v1/getFriendRequest', Core.authenticateJWT, async function (req, res) {
-  
+  Friends.getFriendRequest(req.query)
+  .then((friend) => {
+    res.status(200).send(friend);
+  })
+  .catch(() => res.sendStatus(404))
 })
 
-router.post('/api/v1/friendRequestAction', Core.authenticateJWT, async function (req, res) {
-  
+router.patch('/api/v1/replyFriendRequest', Core.authenticateJWT, async function (req, res) {
+  Friends.replyFriendRequest(req.body)
+  .then((friend) => {
+    res.status(200).send(friend);
+  })
+  .catch(() => res.sendStatus(404))
 })
 // End friend
 

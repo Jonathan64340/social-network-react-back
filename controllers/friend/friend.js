@@ -54,6 +54,7 @@ class Friend extends Core {
         return new Promise(async (resolve, reject) => {
             if (!id) return reject();
 
+            // All request friends equals to accept, and then get all users from the returned friend_id with function toObjectId
             resolve(await aggregation(this.collection, [{
                 "$match": {
                     "$expr": {
@@ -73,39 +74,53 @@ class Friend extends Core {
                     },
                 },
             }, {
+                "$project": {
+                    "_id": 0,
+                    "friend_id":
+                    {
+                        "$cond": {
+                            "if": {
+                                "$ne": ['$receiverId', id]
+                            },
+                            "then": { $toObjectId: '$receiverId' },
+                            "else": { $toObjectId: '$senderId' }
+                        }
+                    },
+
+                }
+            }, {
                 "$lookup": {
                     "from": "users",
-                    "let": {
-                        "id": "$senderId"
-                    },
+                    "let": { "id": "$friend_id" },
                     "pipeline": [
                         {
                             "$match": {
                                 "$expr": {
-                                    "$eq": ["$$id", "$_id"]
+                                    "$eq": ["$_id", "$$id"]
                                 }
+                            }
+                        },
+                        {
+                            "$project": {
+                                "password": 0,
+                                "registration_date": 0,
+                                "modifiedAt": 0,
+                                "email": 0,
+                                "createdAt": 0
                             }
                         }
                     ],
-                    "as": "user"
+                    "as": "friends"
                 },
+            }, {
+                "$project": {
+                    "friend_id": 0
+                }
             }
+
             ])
                 .sort({ createdAt: -1 })
                 .toArray())
-
-            // const friends = await this.collection.find({
-            //     $or: [{
-            //         receiverId: id,
-            //         status: 'accept'
-            //     },
-            //     {
-            //         senderId: id,
-            //         status: 'accept'
-            //     }]
-            // })
-            // .sort({ createdAt: -1 })
-            // .toArray()
         })
     }
 }

@@ -110,7 +110,7 @@ class Friend extends Core {
                             }
                         }
                     ],
-                    "as": "friends"
+                    "as": "friends_data"
                 },
             }, {
                 "$project": {

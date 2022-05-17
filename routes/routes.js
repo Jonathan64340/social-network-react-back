@@ -33,8 +33,8 @@ const init = (db, io) => {
 }
 
 // Authentication
-router.post('/api/v1/auth/login', function (req, res) {
-  Auth.login(req.body)
+router.post('/api/v1/auth/login', async function (req, res) {
+  await Auth.login(req.body)
     .then(data => { res.status(200).send(data) })
     .catch(err => {
       beautifierConsole('bgRed', err)
@@ -42,8 +42,8 @@ router.post('/api/v1/auth/login', function (req, res) {
     })
 });
 
-router.post('/api/v1/auth/register', function (req, res) {
-  Auth.register(req.body)
+router.post('/api/v1/auth/register', async function (req, res) {
+  await Auth.register(req.body)
     .then(data => { res.status(200).send(data) })
     .catch(err => {
       beautifierConsole('bgRed', err)
@@ -55,8 +55,8 @@ router.post('/api/v1/auth/password-recover', function (req, res) {
 
 });
 
-router.post('/api/v1/refreshToken', (req, res, next) => {
-  Core.authenticateRefreshToken(req, res, next)
+router.post('/api/v1/refreshToken', async (req, res, next) => {
+  await Core.authenticateRefreshToken(req, res, next)
     .then(async accessToken => {
       res.send({ accessToken: await accessToken.accessToken });
     })
@@ -67,17 +67,17 @@ router.post('/api/v1/refreshToken', (req, res, next) => {
 router.get('/api/v1/user/me', Core.authenticateJWT, async function (req, res) {
   if (req.headers.authorization) {
     await User.getMe({ token: req.headers.authorization.split(' ')[1] })
-    .then(user => {
-      res.status(200).send(user)
-    })
-    .catch(() => res.sendStatus(401))
+      .then(user => {
+        res.status(200).send(user)
+      })
+      .catch(() => res.sendStatus(401))
   }
 });
 // End user
 
 // Publication
 router.post('/api/v1/publication', Core.authenticateJWT, async function (req, res) {
-  Publication.create(req.body)
+  await Publication.create(req.body)
     .then((result) => {
       res.status(200).send({
         text: 'publication.notification.new.success',
@@ -88,7 +88,7 @@ router.post('/api/v1/publication', Core.authenticateJWT, async function (req, re
 })
 
 router.patch('/api/v1/publication/edit/:id', Core.authenticateJWT, async function (req, res) {
-  Publication.edit(req.body)
+  await Publication.edit(req.body)
     .then((result) => {
       res.status(200).send({
         text: 'publication.notification.edit.success',
@@ -99,7 +99,7 @@ router.patch('/api/v1/publication/edit/:id', Core.authenticateJWT, async functio
 })
 
 router.get('/api/v1/publication', Core.authenticateJWT, async function (req, res) {
-  Publication.get(req.query)
+  await Publication.get(req.query)
     .then((publications) => {
       res.status(200).send(publications)
     })
@@ -107,7 +107,7 @@ router.get('/api/v1/publication', Core.authenticateJWT, async function (req, res
 })
 
 router.delete('/api/v1/publication', Core.authenticateJWT, async function (req, res) {
-  Publication.delete(req.query)
+  await Publication.delete(req.query)
     .then(() => {
       res.sendStatus(200)
     })
@@ -116,7 +116,7 @@ router.delete('/api/v1/publication', Core.authenticateJWT, async function (req, 
 
 // Publication comments
 router.post('/api/v1/publication/comment/new', Core.authenticateJWT, async function (req, res) {
-  Comments.create(req.body)
+  await Comments.create(req.body)
     .then((comment) => {
       res.status(200).send(comment)
     })
@@ -124,7 +124,7 @@ router.post('/api/v1/publication/comment/new', Core.authenticateJWT, async funct
 })
 
 router.delete('/api/v1/publication/comment/delete', Core.authenticateJWT, async function (req, res) {
-  Comments.delete(req.query)
+  await Comments.delete(req.query)
     .then((comment) => {
       res.status(200).send(comment)
     })
@@ -132,7 +132,7 @@ router.delete('/api/v1/publication/comment/delete', Core.authenticateJWT, async 
 })
 
 router.patch('/api/v1/publication/comment/edit/:id', Core.authenticateJWT, async function (req, res) {
-  Comments.edit(req.body)
+  await Comments.edit(req.body)
     .then((comment) => {
       res.status(200).send(comment)
     })
@@ -144,33 +144,42 @@ router.patch('/api/v1/publication/comment/edit/:id', Core.authenticateJWT, async
 
 // Friend
 router.post('/api/v1/sendFriendRequest', Core.authenticateJWT, async function (req, res) {
-  Friends.sendFriendRequest(req.body)
-  .then((friend) => {
-    res.status(200).send(friend);
-  })
-  .catch(() => res.sendStatus(404))
+  await Friends.sendFriendRequest(req.body)
+    .then((friend) => {
+      res.status(200).send(friend);
+    })
+    .catch(() => res.sendStatus(404))
 })
 
 router.get('/api/v1/getFriendRequest', Core.authenticateJWT, async function (req, res) {
-  Friends.getFriendRequest(req.query)
-  .then((friend) => {
-    res.status(200).send(friend);
-  })
-  .catch(() => res.sendStatus(404))
+  await Friends.getFriendRequest(req.query)
+    .then((friend) => {
+      res.status(200).send(friend);
+    })
+    .catch(() => res.sendStatus(404))
 })
 
 router.patch('/api/v1/replyFriendRequest', Core.authenticateJWT, async function (req, res) {
-  Friends.replyFriendRequest(req.body)
-  .then((friend) => {
-    res.status(200).send(friend);
-  })
-  .catch(() => res.sendStatus(404))
+  await Friends.replyFriendRequest(req.body)
+    .then((friend) => {
+      res.status(200).send(friend);
+    })
+    .catch(() => res.sendStatus(404))
+})
+
+router.get('/api/v1/getFriends', Core.authenticateJWT, async function (req, res) {
+  await Friends.getFriends(req.query)
+    .then((friends) => {
+      console.log(friends)
+      res.status(200).send(friends)
+    })
+    .catch(() => res.sendStatus(403))
 })
 // End friend
 
 // Global user interact
 router.get('/api/v1/user-list', Core.authenticateJWT, async function (req, res) {
-   User.getUserList(req.query)
+  await User.getUserList(req.query)
     .then((userList) => {
       res.status(200).send(userList)
     })
@@ -178,11 +187,11 @@ router.get('/api/v1/user-list', Core.authenticateJWT, async function (req, res) 
 })
 
 router.get('/api/v1/user', Core.authenticateJWT, async function (req, res) {
-  User.getUser(req.query)
-   .then((userList) => {
-     res.status(200).send(userList)
-   })
-   .catch(() => res.sendStatus(404))
+  await User.getUser(req.query)
+    .then((userList) => {
+      res.status(200).send(userList)
+    })
+    .catch(() => res.sendStatus(404))
 })
 
 module.exports.init = init;

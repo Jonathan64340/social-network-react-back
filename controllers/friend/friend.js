@@ -24,7 +24,7 @@ class Friend extends Core {
     getFriendRequest({ userId, to }) {
         return new Promise(async (resolve, reject) => {
             if (!userId || !to) return reject();
-            const friendRequest = await this.collection.findOne({ $or: [{ senderId: userId, receiverId: to }, { senderId: to, receiverId: userId }] }, { $orderby: { createdAt: -1 }});
+            const friendRequest = await this.collection.findOne({ $or: [{ senderId: userId, receiverId: to }, { senderId: to, receiverId: userId }] }, { $orderby: { createdAt: -1 } });
             resolve(friendRequest);
         })
     }
@@ -38,7 +38,7 @@ class Friend extends Core {
 
                 if (status === 'decline') {
                     await this.collection.deleteOne({ _id: pId });
-                    resolve({ status: 'decline'});
+                    resolve({ status: 'decline' });
                 }
 
                 await this.collection.updateOne({ _id: pId }, { $set: { status } });
@@ -47,6 +47,65 @@ class Friend extends Core {
             } else {
                 reject()
             }
+        })
+    }
+
+    getFriends({ id }) {
+        return new Promise(async (resolve, reject) => {
+            if (!id) return reject();
+
+            resolve(await aggregation(this.collection, [{
+                "$match": {
+                    "$expr": {
+                        "$or": [{
+                            "$and": [{
+                                "$eq": [id, "$receiverId"],
+                            }, {
+                                "$eq": ['accept', "$status"],
+                            }]
+                        }, {
+                            "$and": [{
+                                "$eq": [id, "$senderId"],
+                            }, {
+                                "$eq": ['accept', "$status"]
+                            }]
+                        }]
+                    },
+                },
+            }, {
+                "$lookup": {
+                    "from": "users",
+                    "let": {
+                        "id": "$senderId"
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$eq": ["$$id", "$_id"]
+                                }
+                            }
+                        }
+                    ],
+                    "as": "user"
+                },
+            }
+            ])
+                .sort({ createdAt: -1 })
+                .toArray())
+
+            // const friends = await this.collection.find({
+            //     $or: [{
+            //         receiverId: id,
+            //         status: 'accept'
+            //     },
+            //     {
+            //         senderId: id,
+            //         status: 'accept'
+            //     }]
+            // })
+            // .sort({ createdAt: -1 })
+            // .toArray()
         })
     }
 }

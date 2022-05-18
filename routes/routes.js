@@ -7,6 +7,7 @@ const _user = require('../controllers/user/UserCtrl');
 const _publication = require('../controllers/publication/publication');
 const _comments = require('../controllers/publication/comments');
 const _friends = require('../controllers/friend/friend');
+const _messenger = require('../controllers/messenger/messenger');
 const beautifierConsole = require('../utils/beautifierConsole');
 
 const Auth = new _auth();
@@ -15,6 +16,7 @@ const User = new _user();
 const Publication = new _publication();
 const Comments = new _comments();
 const Friends = new _friends();
+const Messenger = new _messenger();
 const _io = require('../socket/socket.class');
 let socket = null;
 
@@ -24,6 +26,7 @@ const init = (db, io) => {
   Publication.init(db);
   Comments.init(db);
   Friends.init(db);
+  Messenger.init(db);
   if (io) socket = io;
 
   // Define socket
@@ -175,6 +178,25 @@ router.get('/api/v1/getFriends', Core.authenticateJWT, async function (req, res)
     .catch(() => res.sendStatus(403))
 })
 // End friend
+
+// Messenger
+router.post('/api/v1/messenger/create', Core.authenticateJWT, async function (req, res) {
+  await Messenger.createNewMessage(req.body)
+    .then((message) => {
+      res.status(200).send(message)
+    })
+    .catch(() => res.sendStatus(500))
+})
+
+router.get('/api/v1/messenger/get-message', Core.authenticateJWT, async function (req, res) {
+  await Messenger.getMessages(req.query)
+    .then((message) => {
+      res.status(200).send(message)
+    })
+    .catch(() => res.sendStatus(500))
+})
+
+// End messenger
 
 // Global user interact
 router.get('/api/v1/user-list', Core.authenticateJWT, async function (req, res) {

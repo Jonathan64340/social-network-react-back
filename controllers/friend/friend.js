@@ -113,6 +113,9 @@ class Friend extends Core {
                     "as": "friends_data"
                 },
             }, {
+                "$unwind": "$friends_data"
+            },
+            {
                 "$project": {
                     "friend_id": 0
                 }

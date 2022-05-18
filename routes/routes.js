@@ -170,7 +170,6 @@ router.patch('/api/v1/replyFriendRequest', Core.authenticateJWT, async function 
 router.get('/api/v1/getFriends', Core.authenticateJWT, async function (req, res) {
   await Friends.getFriends(req.query)
     .then((friends) => {
-      console.log(friends)
       res.status(200).send(friends)
     })
     .catch(() => res.sendStatus(403))

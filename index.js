@@ -15,17 +15,18 @@ const cors = require('cors');
 // Cors
 const allowedOrigins = [process.env.allowedCorsOriginLocal, process.env.allowedCorsOrigin];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    console.log(origin)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  }
-}));
+app.use(cors());
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     console.log(origin)
+//     if (!origin) return callback(null, true);
+//     if (allowedOrigins.indexOf(origin) === -1) {
+//       const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+//       return callback(new Error(msg), false);
+//     }
+//     return callback(null, true);
+//   }
+// }));
 
 // Bodyparser
 app.use(express.json());

@@ -48,13 +48,11 @@ const http = require('http').createServer(app);
 
 // Listen server
 const port = process.env.PORT || 5000;
-const io = require('socket.io')(http.listen(port, () => beautifierLogs('fgBlue', `This server is launched on port ${process.env.PORT || 5000}`))
-// , {
-//   cors: {
-//     origin: socketCorsUrl['socket-cors-url'],
-//     methods: socketCorsUrl['socket-cors-methods']
-//   }
-// }
-);
+const io = require('socket.io')(http.listen(port, () => beautifierLogs('fgBlue', `This server is launched on port ${process.env.PORT || 5000}`)), {
+  cors: {
+    origin: socketCorsUrl['socket-cors-url'],
+    methods: socketCorsUrl['socket-cors-methods']
+  }
+});
 
 module.exports.io = io;

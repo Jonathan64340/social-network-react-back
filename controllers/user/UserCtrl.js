@@ -51,11 +51,16 @@ class User extends Core {
         })
     }
 
-    async edit({ _id, sid }) {
+    async edit({ _id, sid, status, type }) {
         return new Promise(async (resolve, reject) => {
             const userId = ObjectId.isValid(_id) ? ObjectId(_id) : null;
             if (!userId) return reject();
-            await this.collection.updateOne({ _id: userId }, { $set: { sid: sid }});
+            const data = {
+                ...((typeof sid !== 'undefined') && { sid: sid }),
+                ...((typeof status !== 'undefined') && { status: status, modifiedAt: new Date().getTime() }),
+                ...((typeof type !== 'undefined' && type === 'login') && { last_login: new Date().getTime() })
+            }
+            await this.collection.updateOne({ _id: userId }, { $set: { ...data } });
             resolve({})
         })
     }

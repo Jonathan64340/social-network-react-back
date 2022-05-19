@@ -50,6 +50,15 @@ class User extends Core {
             });
         })
     }
+
+    async edit({ _id, sid }) {
+        return new Promise(async (resolve, reject) => {
+            const userId = ObjectId.isValid(_id) ? ObjectId(_id) : null;
+            if (!userId) return reject();
+            await this.collection.updateOne({ _id: userId }, { $set: { sid: sid }});
+            resolve({})
+        })
+    }
 }
 
 module.exports = User;

@@ -21,16 +21,23 @@ const _io = require('../socket/socket.class');
 let socket = null;
 
 const init = (db, io) => {
-  Auth.init(db);
-  User.init(db);
-  Publication.init(db);
-  Comments.init(db);
-  Friends.init(db);
-  Messenger.init(db);
   if (io) socket = io;
+  Auth.init(db, socket);
+  User.init(db, socket);
+  Publication.init(db, socket);
+  Comments.init(db, socket);
+  Friends.init(db, socket);
+  Messenger.init(db, socket);
 
   // Define socket
-  new _io().init(db, io);
+  new _io().init(db, socket, {
+    Auth,
+    User,
+    Publication,
+    Comments,
+    Friends,
+    Messenger
+  });
 
   // Now we can use like socket.emit('source', data);
 }
@@ -75,6 +82,14 @@ router.get('/api/v1/user/me', Core.authenticateJWT, async function (req, res) {
       })
       .catch(() => res.sendStatus(401))
   }
+});
+
+router.post('/api/v1/user/edit', Core.authenticateJWT, async function (req, res) {
+  await User.edit(req.body)
+    .then(user => {
+      res.status(200).send(user)
+    })
+    .catch(() => res.sendStatus(401))
 });
 // End user
 

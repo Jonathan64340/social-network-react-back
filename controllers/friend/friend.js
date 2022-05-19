@@ -21,6 +21,21 @@ class Friend extends Core {
         })
     }
 
+    friendsSocketFactory({ socket }) {
+        if (!socket) return;
+        socket.on('update_friends_list', (data) => {
+            if (data.friends.length > 0) {
+                const friends = data.friends;
+                delete data.friends;
+                if (friends) {
+                    for(let i = 0; i < friends.length; i++) {
+                        socket.to(friends[i]['friends_data']['sid']).emit('update_friends_list', { ...data, from: socket.id })
+                    }
+                }
+            }
+        })
+    }
+
     getFriendRequest({ userId, to }) {
         return new Promise(async (resolve, reject) => {
             if (!userId || !to) return reject();

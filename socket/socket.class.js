@@ -14,6 +14,7 @@ class Socket {
 
             this.socket.on('connection', socket => {
                 this._Class.Messenger.messengerSocketFactory({ io: this.socket, socket, emit: this.emit });
+                this._Class.Friends.friendsSocketFactory({ io: this.socket, socket, emit: this.emit });
             })
         }
     }

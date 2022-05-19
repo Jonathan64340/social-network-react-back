@@ -45,9 +45,6 @@ CoreClass.init()
 
 const http = require('http').createServer(app);
 
-
-
-
 // Listen server
 const port = process.env.PORT || 5000;
 const io = require('socket.io')(app.listen(port, () => beautifierLogs('fgBlue', `This server is launched on port ${process.env.PORT || 5000}`)), {

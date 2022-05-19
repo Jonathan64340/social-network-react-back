@@ -15,18 +15,17 @@ const cors = require('cors');
 // Cors
 const allowedOrigins = [process.env.allowedCorsOriginLocal, process.env.allowedCorsOrigin];
 
-app.use(cors());
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     console.log(origin)
-//     if (!origin) return callback(null, true);
-//     if (allowedOrigins.indexOf(origin) === -1) {
-//       const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
-//       return callback(new Error(msg), false);
-//     }
-//     return callback(null, true);
-//   }
-// }));
+app.use(cors({
+  origin: function (origin, callback) {
+    console.log(origin)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+}));
 
 // Bodyparser
 app.use(express.json());
@@ -49,7 +48,7 @@ const http = require('http').createServer(app);
 
 // Listen server
 const port = process.env.PORT || 5000;
-const io = require('socket.io')(app.listen(port, () => beautifierLogs('fgBlue', `This server is launched on port ${process.env.PORT || 5000}`)), {
+const io = require('socket.io')(http.listen(port, () => beautifierLogs('fgBlue', `This server is launched on port ${process.env.PORT || 5000}`)), {
   cors: {
     origin: socketCorsUrl['socket-cors-url'],
     methods: socketCorsUrl['socket-cors-methods']

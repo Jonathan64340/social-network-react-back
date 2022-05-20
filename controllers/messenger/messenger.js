@@ -35,7 +35,7 @@ class Messenger extends Core {
         socket.on('messenger', (data) => {
             if (data.to) {
                 const to = data.to;
-                socket.to(to).emit('messenger', { ...data, from: data.from })
+                socket.to(to).emit('messenger', { ...data, from: socket.id })
             } else {
                 socket.emit('messenger', { ...data })
             }

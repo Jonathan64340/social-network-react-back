@@ -64,6 +64,21 @@ class User extends Core {
             resolve({})
         })
     }
+
+    async userSocketFactory({ socket }) {
+        return new Promise(async (resolve, reject) => {
+            if (!socket.id) return reject();
+            await this.collection.updateOne({ sid: socket.id }, {
+                $set: {
+                    status: 'busy'
+                }
+            });
+  
+            resolve(await this.collection.findOne({ sid: socket.id }))
+
+        })
+
+    }
 }
 
 module.exports = User;

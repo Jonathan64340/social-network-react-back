@@ -35,14 +35,14 @@ class Messenger extends Core {
         socket.on('messenger', (data) => {
             if (data.to) {
                 const to = data.to;
-                socket.to(to).emit('messenger', { ...data, from: socket.id })
+                socket.to(to).emit('messenger', { ...data, from: data.from })
             } else {
                 socket.emit('messenger', { ...data })
             }
         })
     }
 
-    getMessages({ context }) {
+    getMessages({ context, skip = 0 }) {
         return new Promise((resolve, reject) => {
             if (!context) return reject();
 
@@ -65,6 +65,8 @@ class Messenger extends Core {
                     }
                 }
             ])
+                .skip(skip || 0)
+                .limit(20)
                 .sort({ createdAt: -1 })
                 .toArray())
         })

@@ -210,7 +210,11 @@ class Publication extends Core {
                         "as": "comments.user"
                     },
                 },
-            ]).sort({ createdAt: -1 }).toArray());
+            ])
+                .skip(payload.skip || 0)
+                .limit(20)
+                .sort({ createdAt: -1 })
+                .toArray());
         })
     }
 

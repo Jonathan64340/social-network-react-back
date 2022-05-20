@@ -21,19 +21,33 @@ class Friend extends Core {
         })
     }
 
-    friendsSocketFactory({ socket }) {
+    friendsSocketFactory({ socket, friensData, user }) {
         if (!socket) return;
-        socket.on('update_friends_list', (data) => {
-            if (data.friends.length > 0) {
-                const friends = data.friends;
-                delete data.friends;
+
+        if (friensData && user) {
+            if (friensData.friends.length > 0) {
+                const friends = firendsData.friends;
+                delete friensData.friends;
                 if (friends) {
                     for(let i = 0; i < friends.length; i++) {
-                        socket.to(friends[i]['friends_data']['sid']).emit('update_friends_list', { ...data, from: socket.id })
+                        socket.to(friends[i]['friends_data']['sid']).emit('update_friends_list', { ...user, from: socket.id })
                     }
                 }
             }
-        })
+        } else {
+            socket.on('update_friends_list', (data) => {
+                if (data.friends.length > 0) {
+                    const friends = data.friends;
+                    delete data.friends;
+                    if (friends) {
+                        for(let i = 0; i < friends.length; i++) {
+                            socket.to(friends[i]['friends_data']['sid']).emit('update_friends_list', { ...data, from: socket.id })
+                        }
+                    }
+                }
+            })
+        }
+
     }
 
     getFriendRequest({ userId, to }) {

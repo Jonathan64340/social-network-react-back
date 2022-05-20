@@ -13,7 +13,7 @@ const app = express();
 const cors = require('cors');
 
 // Cors
-const allowedOrigins = [process.env.allowedCorsOriginLocal, process.env.allowedCorsOrigin];
+const allowedOrigins = ['https://test-social-01.netlify.app'];
 
 app.use(cors({
   origin: function (origin, callback) {

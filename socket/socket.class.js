@@ -21,7 +21,7 @@ class Socket {
                 socket.on('disconnect', async () => {
                     const user = await this._Class.User.userSocketFactory({ socket, status: 'busy' });
                     if (user !== null) {
-                        console.table({ user })
+                        console.table({ user });
                         const friendsData = await this._Class.Friends.getFriends({ id: ObjectId(user._id).toString() });
                         await this._Class.Friends.friendsSocketFactory({ socket, friendsData, user });
                     }

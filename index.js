@@ -10,7 +10,7 @@ const socketCorsUrl = require('./configs/socket.json');
 // Dependencies
 const express = require('express');
 const app = express();
-// const cors = require('cors');
+const cors = require('cors');
 
 // Cors
 const allowedOrigins = [process.env.allowedCorsOriginLocal, process.env.allowedCorsOrigin];

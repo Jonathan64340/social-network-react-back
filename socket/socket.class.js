@@ -19,8 +19,10 @@ class Socket {
                 this._Class.Friends.friendsSocketFactory({ socket });
                 socket.on('disconnect', async () => {
                     const user = await this._Class.User.userSocketFactory({ socket, status: 'busy' });
-                    const friends = await this._Class.Friends.getFriends({ id: ObjectId(user._id).toString() });
-                    await this._Class.Friends.friendsSocketFactory({ socket, status: 'busy', friendsData: friends, user: user });
+                    if (user !== null) {
+                        const friendsData = await this._Class.Friends.getFriends({ id: ObjectId(user._id).toString() });
+                        await this._Class.Friends.friendsSocketFactory({ socket, friendsData, user });
+                    }
                 })
             })
         }

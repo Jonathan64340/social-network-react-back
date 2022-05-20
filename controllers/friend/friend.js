@@ -21,16 +21,25 @@ class Friend extends Core {
         })
     }
 
-    friendsSocketFactory({ socket, friensData, user }) {
+    /**
+     * 
+     * @param {*} param0 
+     * @returns username: 'Jonathan Domingues',
+                sid: 'e1vOwlUyzwGCd_akAAAD',
+                status: 'online',
+                _id: '62065a4c1199657b86dbfb67',
+                friends: [ { friends_data: [Object] }, { friends_data: [Object] } ]
+     */
+    friendsSocketFactory({ socket, friendsData, user }) {
         if (!socket) return;
 
-        if (friensData && user) {
-            if (friensData.friends.length > 0) {
-                const friends = firendsData.friends;
-                delete friensData.friends;
+        if (friendsData && user) {
+            if (friendsData.length > 0) {
+                const friends = friendsData;
                 if (friends) {
-                    for(let i = 0; i < friends.length; i++) {
-                        socket.to(friends[i]['friends_data']['sid']).emit('update_friends_list', { ...user, from: socket.id })
+                    for (let i = 0; i < friends.length; i++) {
+                        const { username, sid, status, _id } = user; 
+                        socket.to(friends[i]['friends_data']['sid']).emit('update_friends_list', { username, sid, status, _id, friends: friendsData, from: socket.id })
                     }
                 }
             }
@@ -40,7 +49,7 @@ class Friend extends Core {
                     const friends = data.friends;
                     delete data.friends;
                     if (friends) {
-                        for(let i = 0; i < friends.length; i++) {
+                        for (let i = 0; i < friends.length; i++) {
                             socket.to(friends[i]['friends_data']['sid']).emit('update_friends_list', { ...data, from: socket.id })
                         }
                     }

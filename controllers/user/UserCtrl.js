@@ -66,14 +66,17 @@ class User extends Core {
     }
 
     async userSocketFactory({ socket }) {
-        if (!socket.id) return;
-        await this.collection.updateOne({ sid: socket.id }, {
-            $set: {
-                status: 'busy'
-            }
-        });
+        return new Promise(async (resolve, reject) => {
+            if (!socket.id) return reject();
+            await this.collection.updateOne({ sid: socket.id }, {
+                $set: {
+                    status: 'busy'
+                }
+            });
+  
+            resolve(await this.collection.findOne({ sid: socket.id }))
 
-        return await this.collection.findOne({ sid: socket.id }, { projection: { "password": 0, "createdAt": 0, "modifiedAt": 0 } })
+        })
 
     }
 }

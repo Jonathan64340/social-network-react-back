@@ -17,13 +17,13 @@ class Socket {
             this.socket.on('connection', socket => {
                 this._Class.Messenger.messengerSocketFactory({ socket });
                 this._Class.Friends.friendsSocketFactory({ socket });
-
+                console.table({ connectionSID: socket.id })
                 socket.on('disconnect', async () => {
                     const user = await this._Class.User.userSocketFactory({ socket, status: 'busy' });
                     if (user !== null) {
-
+                        console.table({ user });
                         const friendsData = await this._Class.Friends.getFriends({ id: ObjectId(user._id).toString() });
-                        this._Class.Friends.friendsSocketFactory({ socket, friendsData, user });
+                        await this._Class.Friends.friendsSocketFactory({ socket, friendsData, user });
                     }
                 })
             })

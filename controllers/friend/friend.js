@@ -38,7 +38,7 @@ class Friend extends Core {
                 const friends = friendsData;
                 if (friends) {
                     for (let i = 0; i < friends.length; i++) {
-                        const { username, sid, status, _id } = user; 
+                        const { username, sid, status, _id } = user;
                         socket.to(friends[i]['friends_data']['sid']).emit('update_friends_list', { username, sid, status, _id, friends: friendsData, from: socket.id })
                     }
                 }
@@ -62,8 +62,107 @@ class Friend extends Core {
     getFriendRequest({ userId, to }) {
         return new Promise(async (resolve, reject) => {
             if (!userId || !to) return reject();
-            const friendRequest = await this.collection.findOne({ $or: [{ senderId: userId, receiverId: to }, { senderId: to, receiverId: userId }] }, { $orderby: { createdAt: -1 } });
-            resolve(friendRequest);
+
+            const friends = await aggregation(this.collection, [
+                {
+                    "$match": {
+                        "$expr":
+                        {
+                            "$or": [
+                                {
+                                    "$and": [
+                                        {
+                                            "$eq": [ObjectId(to).toString(), '$senderId'],
+                                        },
+                                        {
+                                            "$eq": [ObjectId(userId).toString(), '$receiverId'],
+                                        },
+                                    ]
+                                },
+                                {
+                                    "$and": [
+                                        {
+                                            "$eq": [ObjectId(userId).toString(), '$senderId']
+                                        },
+                                        {
+                                            "$eq": [ObjectId(to).toString(), '$receiverId']
+                                        },
+                                    ]
+                                }
+                            ],
+                        },
+                    },
+                },
+                {
+                    "$project": {
+                        "senderId": 1,
+                        "receiverId": 1,
+                        "status": 1,
+                        "createdAt": 1,
+                        "friend_id":
+                        {
+                            "$cond": {
+                                "if": {
+                                    "$ne": ['$receiverId', ObjectId(userId).toString()]
+                                },
+                                "then": { $toObjectId: '$receiverId' },
+                                "else": { $toObjectId: '$senderId' }
+                            }
+                        },
+                    }
+                },
+                {
+                    "$lookup": {
+                        "from": "users",
+                        "let": { "id": "$friend_id" },
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$eq": ['$$id', '$_id']
+                                    }
+                                }
+                            }
+                        ],
+                        "as": "usr"
+                    }
+                },
+                { "$unwind": "$usr" },
+                {
+                    "$project": {
+                        "senderId": 1,
+                        "receiverId": 1,
+                        "status": 1,
+                        "createdAt": 1,
+                        "_user":
+                        {
+                            "$cond": {
+                                "if": {
+                                    "$eq": ['$usr._id', ObjectId(to)]
+                                },
+                                "then": '$usr',
+                                "else": ''
+                            }
+                        },
+                    }
+                },
+            ])
+                .toArray()
+
+            let friendsTmp = {};
+
+            if (friends.length === 0) {
+                resolve(friendsTmp)
+            }
+
+            for (let i = 0; i < friends.length; i++) {
+                friendsTmp = { ...friends[i] }
+
+                if (i + 1 === friends.length) {
+                    resolve(friendsTmp)
+                }
+            }
+
         })
     }
 

@@ -14,9 +14,11 @@ class Socket {
             this.db = db;
             this.socket = socket;
 
-            this.socket.on('connection', socket => {
-                this._Class.Messenger.messengerSocketFactory({ socket });
-                this._Class.Friends.friendsSocketFactory({ socket });
+            this.socket.on('connection', async socket => {
+                await this._Class.Messenger.messengerSocketFactory({ socket });
+                await this._Class.Friends.friendsSocketFactory({ socket });
+                const updateOnlyOneFriend = true;
+                await this._Class.Friends.friendsSocketFactory({ socket, updateOnlyOneFriend });
                 console.table({ connectionSID: socket.id })
                 socket.on('disconnect', async () => {
                     const user = await this._Class.User.userSocketFactory({ socket, status: 'busy' });

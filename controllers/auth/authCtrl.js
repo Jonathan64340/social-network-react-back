@@ -47,10 +47,11 @@ class Auth extends Core {
 
     register(payload) {
         return new Promise(async (resolve, reject) => {
-            if (!payload || !payload.username || !payload.email || !payload.password) {
-                reject('form.info.error_form.auth.not_found_account');
+            if (!payload.length || !payload.username.length || !payload.email.length || !payload.password.length) {
+                reject('form.info.error_form.auth.error');
                 return beautifierConsole('fgRed', 'Invalid or missing key in #register on authCtrl.js')
             };
+
             if (typeof this.db === 'undefined') return beautifierConsole('fgRed', 'The db is not init int #register on authCtrl.js');
             if (!validateEmail(payload.email)) {
                 reject('form.info.invalid_field.email');

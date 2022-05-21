@@ -68,15 +68,37 @@ class Friend extends Core {
                     "$match": {
                         "$expr":
                         {
-                            "$and": [
-                                { "senderId": userId, "receiverId": to },
-                                { "senderId": to, "receiverId": userId }
-                            ]
-                        }
+                            "$or": [
+                                {
+                                    "$and": [
+                                        {
+                                            "$eq": [ObjectId(to).toString(), '$senderId'],
+                                        },
+                                        {
+                                            "$eq": [ObjectId(userId).toString(), '$receiverId'],
+                                        },
+                                    ]
+                                },
+                                {
+                                    "$and": [
+                                        {
+                                            "$eq": [ObjectId(userId).toString(), '$senderId']
+                                        },
+                                        {
+                                            "$eq": [ObjectId(to).toString(), '$receiverId']
+                                        },
+                                    ]
+                                }
+                            ],
+                        },
                     },
                 },
                 {
                     "$project": {
+                        "senderId": 1,
+                        "receiverId": 1,
+                        "status": 1,
+                        "createdAt": 1,
                         "friend_id":
                         {
                             "$cond": {
@@ -108,9 +130,10 @@ class Friend extends Core {
                 { "$unwind": "$usr" },
                 {
                     "$project": {
-                        "request": {
-                            'senderId': 1
-                        },
+                        "senderId": 1,
+                        "receiverId": 1,
+                        "status": 1,
+                        "createdAt": 1,
                         "_user":
                         {
                             "$cond": {
@@ -136,7 +159,6 @@ class Friend extends Core {
                 friendsTmp = { ...friends[i] }
 
                 if (i + 1 === friends.length) {
-                    console.log(friendsTmp)
                     resolve(friendsTmp)
                 }
             }

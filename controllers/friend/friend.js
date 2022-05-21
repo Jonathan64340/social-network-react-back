@@ -16,8 +16,72 @@ class Friend extends Core {
             if (!senderId || !receiverId || !status) return reject();
 
             const { insertedId } = await this.collection.insertOne({ senderId, receiverId, status: 'pending', createdAt: new Date().getTime() }, { upsert: true, returnDocument: 'after' });
-            const friendRequestData = await this.collection.findOne({ _id: insertedId });
-            resolve(friendRequestData);
+
+            const friendRequestData = await aggregation(this.collection, [
+                {
+                    "$match": {
+                        "$expr": {
+                            "$eq": [insertedId, "$_id"]
+                        },
+                    },
+                },
+                {
+                    "$project": {
+                        "senderId": 1,
+                        "receiverId": 1,
+                        "status": 1,
+                        "createdAt": 1,
+                        "friend_id":
+                        {
+                            "$cond": {
+                                "if": {
+                                    "$ne": ['$receiverId', ObjectId(senderId).toString()]
+                                },
+                                "then": { $toObjectId: '$receiverId' },
+                                "else": { $toObjectId: '$senderId' }
+                            }
+                        },
+                    }
+                },
+                {
+                    "$lookup": {
+                        "from": "users",
+                        "let": { "id": "$friend_id" },
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$eq": ['$$id', '$_id']
+                                    }
+                                }
+                            }
+                        ],
+                        "as": "user"
+                    }
+                },
+                {
+                    "$unwind": "$user"
+                },
+                {
+                    "$project": {
+                        "user.password": 0,
+                        "user.createdAt": 0,
+                        "user.modifiedAt": 0,
+                        "user.registration_date": 0,
+                        "user.last_login": 0,
+                        "user.email": 0
+                    }
+                }
+            ])
+                .toArray()
+
+            let friendRequest = {};
+
+            for (let i = 0; i < friendRequestData.length; i++) {
+                friendRequest = { ...friendRequestData[i] }
+            }
+
+            resolve(friendRequest)
         })
     }
 
@@ -30,8 +94,23 @@ class Friend extends Core {
                 _id: '62065a4c1199657b86dbfb67',
                 friends: [ { friends_data: [Object] }, { friends_data: [Object] } ]
      */
-    friendsSocketFactory({ socket, friendsData, user }) {
+    friendsSocketFactory({ socket, friendsData, user, updateOnlyOneFriend }) {
         if (!socket) return;
+
+        if (updateOnlyOneFriend) {
+            socket.on('update_friend', (data) => {
+                if (data) {
+                    if (data.user) {
+                        if (data.user.sid) {
+                            if (data.user.sid) {
+                                socket.to(data.user.sid).emit('update_friend', { ...data })
+                            }
+                        }
+                    }
+                }
+            })
+            return
+        }
 
         if (friendsData && user) {
             if (friendsData.length > 0) {
@@ -146,6 +225,16 @@ class Friend extends Core {
                         },
                     }
                 },
+                {
+                    "$project": {
+                        "_user.password": 0,
+                        "_user.createdAt": 0,
+                        "_user.modifiedAt": 0,
+                        "_user.registration_date": 0,
+                        "_user.last_login": 0,
+                        "_user.email": 0
+                    }
+                }
             ])
                 .toArray()
 

@@ -322,7 +322,14 @@ class Friend extends Core {
                         {
                             "$match": {
                                 "$expr": {
-                                    "$eq": ["$_id", "$$id"]
+                                    "$and": [
+                                        {
+                                            "$eq": ["$_id", "$$id"]
+                                        },
+                                        {
+                                            "$gt": [{ "$add": ["$last_login", 24 * 60 * 60 * 1000] }, new Date().getTime()]
+                                        }
+                                    ]
                                 }
                             }
                         },

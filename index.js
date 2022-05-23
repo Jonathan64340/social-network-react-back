@@ -13,7 +13,7 @@ const app = express();
 const cors = require('cors');
 
 // Cors
-const allowedOrigins = ['https://test-social-01.netlify.app', 'http://localhost:3000'];
+const allowedOrigins = ['https://develop.d3a6fqvx5wzxhf.amplifyapp.com', 'http://localhost:3000'];
 
 app.use(cors({
   origin: function (origin, callback) {

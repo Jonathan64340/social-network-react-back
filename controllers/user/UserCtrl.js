@@ -65,12 +65,13 @@ class User extends Core {
         })
     }
 
-    async userSocketFactory({ socket }) {
+    async userSocketFactory({ socket, last_login }) {
         return new Promise(async (resolve, reject) => {
             if (!socket.id) return reject();
             await this.collection.updateOne({ sid: socket.id }, {
                 $set: {
-                    status: 'busy'
+                    status: 'busy',
+                    ...(last_login && { last_login: last_login })
                 }
             });
   

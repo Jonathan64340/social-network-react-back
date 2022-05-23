@@ -21,7 +21,7 @@ class Socket {
                 await this._Class.Friends.friendsSocketFactory({ socket, updateOnlyOneFriend });
                 console.table({ connectionSID: socket.id })
                 socket.on('disconnect', async () => {
-                    const user = await this._Class.User.userSocketFactory({ socket, status: 'busy' });
+                    const user = await this._Class.User.userSocketFactory({ socket, status: 'busy', last_login: new Date().getTime() });
                     if (user !== null) {
                         console.table({ user });
                         const friendsData = await this._Class.Friends.getFriends({ id: ObjectId(user._id).toString() });

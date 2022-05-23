@@ -47,7 +47,7 @@ class Auth extends Core {
 
     register(payload) {
         return new Promise(async (resolve, reject) => {
-            if (!payload.length || !payload.username.length || !payload.email.length || !payload.password.length) {
+            if (!payload.username.length || !payload.email.length || !payload.password.length || !payload.firstname || !payload.lastname || !payload.sid) {
                 reject('form.info.error_form.auth.error');
                 return beautifierConsole('fgRed', 'Invalid or missing key in #register on authCtrl.js')
             };
@@ -70,7 +70,7 @@ class Auth extends Core {
                         if (err) return reject('Error occured on register #2.');
 
                         if (hash) {
-                            const newUser = await this.db.collection('users').insertOne({ username: payload.username, password: hash, email: payload.email, createdAt: new Date().getTime(), modifiedAt: new Date().getTime(), registration_date: new Date().getTime() });
+                            const newUser = await this.db.collection('users').insertOne({ username: payload.username, password: hash, email: payload.email, createdAt: new Date().getTime(), modifiedAt: new Date().getTime(), registration_date: new Date().getTime(), sid: payload.sid });
                             const token = await this.jwtEncode({ "_id": newUser.insertedId });
                             const refreshToken = await this.generateRefreshToken({ "_id:": newUser.insertedId });
                             return resolve({ accessToken: token, refreshToken, "user": newUser.insertedId });

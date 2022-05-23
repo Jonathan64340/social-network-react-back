@@ -42,7 +42,7 @@ class Messenger extends Core {
         })
     }
 
-    getMessages({ context, skip = 0 }) {
+    getMessages({ context, skip }) {
         return new Promise((resolve, reject) => {
             if (!context) return reject();
 
@@ -65,9 +65,9 @@ class Messenger extends Core {
                     }
                 }
             ])
+                .sort({ createdAt: -1 })
                 .skip(skip || 0)
                 .limit(20)
-                .sort({ createdAt: -1 })
                 .toArray())
         })
     }

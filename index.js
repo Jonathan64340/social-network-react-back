@@ -15,16 +15,18 @@ const cors = require('cors');
 // Cors
 const allowedOrigins = ['https://develop.d3a6fqvx5wzxhf.amplifyapp.com', 'http://localhost:3000'];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  }
-}));
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin) return callback(null, true);
+//     if (allowedOrigins.indexOf(origin) === -1) {
+//       const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+//       return callback(new Error(msg), false);
+//     }
+//     return callback(null, true);
+//   }
+// }));
+
+app.use(cors())
 
 // Bodyparser
 app.use(express.json());
@@ -49,7 +51,7 @@ const http = require('http').createServer(app);
 const port = process.env.PORT || 5000;
 const io = require('socket.io')(http.listen(port, () => beautifierLogs('fgBlue', `This server is launched on port ${process.env.PORT || 5000}`)), {
   cors: {
-    origin: socketCorsUrl['socket-cors-url'],
+    origin: /*socketCorsUrl['socket-cors-url']*/ '*',
     methods: socketCorsUrl['socket-cors-methods']
   },
   httpCompression: true

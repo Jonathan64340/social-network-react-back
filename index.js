@@ -44,19 +44,11 @@ CoreClass.init()
   })
   .catch(() => console.log())
 
-const fs = require('fs');
-
-const options = {
-  key: fs.readFileSync('./configs/certificates/private.key'),
-  cert: fs.readFileSync('./configs/certificates/certificate.crt'),
-  ca: fs.readFileSync('./configs/certificates/ca_bundle.crt')
-};
-
-const https = require('https').createServer({ ...options }, app);
+const http = require('http').createServer(app);
 
 // Listen server
 const port = process.env.PORT || 5000;
-const io = require('socket.io')(https.listen(port, () => beautifierLogs('fgBlue', `This server is launched on port ${process.env.PORT || 5000}`)), {
+const io = require('socket.io')(http.listen(port, () => beautifierLogs('fgBlue', `This server is launched on port ${process.env.PORT || 5000}`)), {
   cors: {
     origin: socketCorsUrl['socket-cors-url'],
     methods: socketCorsUrl['socket-cors-methods']

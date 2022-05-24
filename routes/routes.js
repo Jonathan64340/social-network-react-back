@@ -70,6 +70,7 @@ router.post('/api/v1/refreshToken', async (req, res, next) => {
     .then(async accessToken => {
       res.send({ accessToken: await accessToken.accessToken });
     })
+    .catch(() => res.sendStatus(401))
 });
 // End authentication
 

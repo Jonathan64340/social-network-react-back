@@ -42,7 +42,7 @@ CoreClass.init()
     app.use(routes.router);
 
   })
-  .catch(() => console.log())
+  .catch((err) => console.log(err))
 
 const http = require('http').createServer(app);
 

@@ -24,7 +24,10 @@ class Messenger extends Core {
                 (typeof content.message === 'string' && content.message.length) === 0
             ) return reject();
 
-            const newMessage = await this.collection.insertOne({ context, senderId, receiverId, type, content, createdAt: new Date().getTime(), modifiedAt: new Date().getTime() }, { upsert: true, returnDocument: 'after' });
+            let reads = [];
+            reads.push(receiverId);
+
+            const newMessage = await this.collection.insertOne({ context, senderId, receiverId, type, content, createdAt: new Date().getTime(), modifiedAt: new Date().getTime(), reads: reads }, { upsert: true, returnDocument: 'after' });
 
             resolve(this.collection.findOne({ _id: newMessage.insertedId }));
         })

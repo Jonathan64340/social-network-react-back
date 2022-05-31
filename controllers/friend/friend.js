@@ -353,21 +353,21 @@ class Friend extends Core {
                     "friend_id": 0
                 }
             },
-            {
-                "$lookup": {
-                    "from": "messenger",
-                    "let": { "id": "$friend_id" },
-                    "pipeline": [
-                        {
-                            "$match": {
-                                "$expr": {
-                                    "$eq": ["$id", "$reads.$receiverId"]
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
+            // {
+            //     "$lookup": {
+            //         "from": "messenger",
+            //         "let": { "id": "$friend_id" },
+            //         "pipeline": [
+            //             {
+            //                 "$match": {
+            //                     "$expr": {
+            //                         "$eq": ["$id", "$reads.$receiverId"]
+            //                     }
+            //                 }
+            //             }
+            //         ]
+            //     }
+            // }
             ])
                 .sort({ createdAt: -1 })
                 .toArray())

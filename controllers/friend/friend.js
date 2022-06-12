@@ -203,10 +203,10 @@ class Friend extends Core {
                                 }
                             }
                         ],
-                        "as": "usr"
+                        "as": "user"
                     }
                 },
-                { "$unwind": "$usr" },
+                { "$unwind": "$user" },
                 {
                     "$project": {
                         "senderId": 1,
@@ -217,9 +217,9 @@ class Friend extends Core {
                         {
                             "$cond": {
                                 "if": {
-                                    "$eq": ['$usr._id', ObjectId(to)]
+                                    "$eq": ['$user._id', ObjectId(to)]
                                 },
-                                "then": '$usr',
+                                "then": '$user',
                                 "else": ''
                             }
                         },
@@ -281,7 +281,7 @@ class Friend extends Core {
             if (!id) return reject();
 
             // All request friends equals to accept, and then get all users from the returned friend_id with function toObjectId
-            resolve(await aggregation(this.collection, [{
+            const friends = await aggregation(this.collection, [{
                 "$match": {
                     "$expr": {
                         "$or": [{
@@ -312,7 +312,16 @@ class Friend extends Core {
                             "else": { $toObjectId: '$senderId' }
                         }
                     },
-
+                    "other_id":
+                    {
+                        "$cond": {
+                            "if": {
+                                "$ne": ['$senderId', id]
+                            },
+                            "then": { $toObjectId: '$receiverId' },
+                            "else": { $toObjectId: '$senderId' }
+                        }
+                    },
                 }
             }, {
                 "$lookup": {
@@ -350,27 +359,62 @@ class Friend extends Core {
             },
             {
                 "$project": {
-                    "friend_id": 0
+                    "friend_id": 0,
+                    "other_id": 0
                 }
             },
-            {
-                "$lookup": {
-                    "from": "messenger",
-                    "let": { "id": "$friend_id" },
-                    "pipeline": [
-                        {
-                            "$match": {
-                                "$expr": {
-                                    "$eq": ["$id", "$reads.$receiverId"]
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
             ])
                 .sort({ createdAt: -1 })
-                .toArray())
+                .toArray();
+
+            let skip = 0;
+            for (let i = 0; i < friends.length; i++) {
+                const last_message = await aggregation(this.collection, [{
+                    "$lookup": {
+                        "from": "messenger",
+                        "pipeline": [{
+                            "$match": {
+                                "$expr": {
+                                    "$and": [{
+                                        "$eq": [{ $toString: friends[i].friends_data._id }, "$senderId"]
+                                    }, {
+                                        "$in": [{ $toString: id }, "$unreads"]
+                                    }]
+                                }
+                            }
+                        },
+                        {
+                            "$count": "unreads"
+                        }],
+                        "as": "unreads"
+                    }
+
+                }, {
+                    "$unwind": "$unreads"
+                }])
+                    .sort({ createdAt: -1 })
+                    .skip(skip)
+                    .limit(1)
+                    .toArray();
+
+                    if (last_message.length && friends.length) {
+                        if ((ObjectId(friends[i].friends_data._id).toString() === ObjectId(last_message[0]._id).toString()).toString()) {
+                            skip++;
+                            const { unreads } = last_message[0].unreads;
+                            console.log(last_message, friends[i].friends_data)
+
+                        friends[i] = {
+                            ...friends[i],
+                            friends_data: {
+                                ...friends[i].friends_data,
+                                unreads
+                            }
+                        }
+                    }
+                }
+            }
+
+            resolve(friends);
         })
     }
 }

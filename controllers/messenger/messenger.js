@@ -24,10 +24,10 @@ class Messenger extends Core {
                 (typeof content.message === 'string' && content.message.length) === 0
             ) return reject();
 
-            let reads = [];
-            reads.push(receiverId);
+            let unreads = [];
+            unreads.push(receiverId);
 
-            const newMessage = await this.collection.insertOne({ context, senderId, receiverId, type, content, createdAt: new Date().getTime(), modifiedAt: new Date().getTime(), reads: reads }, { upsert: true, returnDocument: 'after' });
+            const newMessage = await this.collection.insertOne({ context, senderId, receiverId, type, content, createdAt: new Date().getTime(), modifiedAt: new Date().getTime(), unreads: unreads }, { upsert: true, returnDocument: 'after' });
 
             resolve(this.collection.findOne({ _id: newMessage.insertedId }));
         })
@@ -46,11 +46,19 @@ class Messenger extends Core {
     }
 
     getMessages({ context, skip }) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (!context) return reject();
 
             const contextArray = [...context.split(',')];
             if (contextArray.length < 2) return reject();
+
+            await this.collection.updateMany({
+                "context": { "$in":  [contextArray[1], "context"] },
+                "receiverId": contextArray[1],
+                "senderId": contextArray[0]
+            },
+                { "$pull": { "unreads": contextArray[1] } }
+            );
 
             resolve(aggregation(this.collection, [
                 {

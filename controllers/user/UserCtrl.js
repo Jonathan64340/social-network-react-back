@@ -44,7 +44,7 @@ class User extends Core {
         return new Promise(async (resolve, reject) => {
             const userId = ObjectId.isValid(id) ? ObjectId(id) : null;
             if (!userId) return reject();
-            this.collection.findOne({ _id: userId }, { projection: { username: 1 } }, (err, result) => {
+            this.collection.findOne({ _id: userId }, { projection: { username: 1, avatar_url: 1, cover_url: 1 } }, (err, result) => {
                 if (err) return reject();
                 resolve(result);
             });

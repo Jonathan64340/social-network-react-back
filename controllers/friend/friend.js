@@ -343,8 +343,7 @@ class Friend extends Core {
                                 "modifiedAt": 0,
                                 "email": 0,
                                 "createdAt": 0,
-                                "avatar_url": 1,
-                                "cover_url": 1
+                                "cover_url": 0
                             }
                         }
                     ],

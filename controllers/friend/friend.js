@@ -330,15 +330,9 @@ class Friend extends Core {
                     "pipeline": [
                         {
                             "$match": {
-                                "$expr": {
-                                    "$and": [
-                                        {
-                                            "$eq": ["$_id", "$$id"]
-                                        },
-                                        {
-                                            "$gt": [{ "$add": ["$last_login", 24 * 60 * 60 * 1000] }, new Date().getTime()]
-                                        }
-                                    ]
+                                "$expr":
+                                {
+                                    "$eq": ["$_id", "$$id"]
                                 }
                             }
                         },
@@ -397,10 +391,10 @@ class Friend extends Core {
                     .limit(1)
                     .toArray();
 
-                    if (last_message.length && friends.length) {
-                        if ((ObjectId(friends[i].friends_data._id).toString() === ObjectId(last_message[0]._id).toString()).toString()) {
-                            skip++;
-                            const { unreads } = last_message[0].unreads;
+                if (last_message.length && friends.length) {
+                    if ((ObjectId(friends[i].friends_data._id).toString() === ObjectId(last_message[0]._id).toString()).toString()) {
+                        skip++;
+                        const { unreads } = last_message[0].unreads;
 
                         friends[i] = {
                             ...friends[i],

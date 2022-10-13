@@ -11,6 +11,8 @@ const socketCorsUrl = require('./configs/socket.json');
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const fileUpload = require('express-fileupload');
+const fs = require('fs');
 
 // Cors
 const allowedOrigins = ['https://myun-book.com', 'http://localhost:3000'];
@@ -29,6 +31,42 @@ app.use(cors({
 
 // Bodyparser
 app.use(express.json());
+
+// Extended bodyparser
+app.use(express.urlencoded({
+  extended: true
+}));
+
+if (!fs.existsSync(`./public/`)) {
+  fs.mkdirSync(`./public/`, 0775, { recursive: true })
+  if (!fs.existsSync(`/public/uploads/`)) {
+    fs.mkdirSync(`./public/uploads/`, 0775, { recursive: true })
+    if (!fs.existsSync(`/public/uploads/media/`)) {
+      fs.mkdirSync(`./public/uploads/media/`, 0775, { recursive: true })
+      if (!fs.existsSync(`/public/uploads/media/d/`)) {
+        fs.mkdirSync(`./public/uploads/media/d/`, 0775, { recursive: true })
+      }
+    }
+  }
+} 
+
+// Public directorie
+app.use(express.static('public/uploads'));
+
+app.use(fileUpload({
+    limits: {
+        fileSize: 2 * 1024 * 1024 //2mb
+    },
+    abortOnLimit: true,
+    limitHandler: (req, res, next) => {
+    console.log("depassement de la limite ");
+    req.fileIsNotOk = true;
+    req.msg = "file too large or you didn't upload one ";
+    next();
+},
+//safeFileNames: true
+})
+);
 
 // Core
 const Core = require('./controllers/core/coreCtrl');

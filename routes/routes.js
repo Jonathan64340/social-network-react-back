@@ -8,7 +8,9 @@ const _publication = require('../controllers/publication/publication');
 const _comments = require('../controllers/publication/comments');
 const _friends = require('../controllers/friend/friend');
 const _messenger = require('../controllers/messenger/messenger');
+const _media = require('../controllers/media/media');
 const beautifierConsole = require('../utils/beautifierConsole');
+// const multer = require('../configs/multer_config');
 
 const Auth = new _auth();
 const Core = new _core();
@@ -17,6 +19,7 @@ const Publication = new _publication();
 const Comments = new _comments();
 const Friends = new _friends();
 const Messenger = new _messenger();
+const Media = new _media();
 const _io = require('../socket/socket.class');
 let socket = null;
 
@@ -28,6 +31,7 @@ const init = (db, io) => {
   Comments.init(db, socket);
   Friends.init(db, socket);
   Messenger.init(db, socket);
+  Media.init(db);
 
   // Define socket
   new _io().init(db, socket, {
@@ -36,7 +40,8 @@ const init = (db, io) => {
     Publication,
     Comments,
     Friends,
-    Messenger
+    Messenger,
+    Media
   });
 
   // Now we can use like socket.emit('source', data);
@@ -61,7 +66,7 @@ router.post('/api/v1/auth/register', async function (req, res) {
     })
 });
 
-router.post('/api/v1/auth/password-recover', function (req, res) {
+router.post('/api/v1/auth/password-recover', async function (req, res) {
 
 });
 
@@ -93,6 +98,16 @@ router.post('/api/v1/user/edit', Core.authenticateJWT, async function (req, res)
     .catch(() => res.sendStatus(401))
 });
 // End user
+
+// Media
+router.post('/api/v1/upload', Core.authenticateJWT, async function (req, res) {
+  await Media.upload({ req, res })
+    .then(data => { res.status(200).send(data) })
+    .catch(err => {
+      res.status(500).send(err)
+    })
+})
+// End media
 
 // Publication
 router.post('/api/v1/publication', Core.authenticateJWT, async function (req, res) {

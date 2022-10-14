@@ -51,14 +51,16 @@ class User extends Core {
         })
     }
 
-    async edit({ _id, sid, status, type }) {
+    async edit({ _id, sid, status, type, ...payload }) {
         return new Promise(async (resolve, reject) => {
             const userId = ObjectId.isValid(_id) ? ObjectId(_id) : null;
             if (!userId) return reject();
             const data = {
                 ...((typeof sid !== 'undefined') && { sid: sid }),
                 ...((typeof status !== 'undefined') && { status: status, modifiedAt: new Date().getTime() }),
-                ...((typeof type !== 'undefined' && type === 'login') && { last_login: new Date().getTime() })
+                ...((typeof type !== 'undefined' && type === 'login') && { last_login: new Date().getTime() }),
+                ...((typeof payload !== 'undefined' && typeof payload.avatar_url !== 'undefined' && { avatar_url: payload.avatar_url })),
+                ...((typeof payload !== 'undefined' && typeof payload.cover_url !== 'undefined' && { cover_url: payload.cover_url }))
             }
             await this.collection.updateOne({ _id: userId }, { $set: { ...data } });
             resolve({})
@@ -74,7 +76,7 @@ class User extends Core {
                     ...(last_login && { last_login: last_login })
                 }
             });
-  
+
             resolve(await this.collection.findOne({ sid: socket.id }))
 
         })

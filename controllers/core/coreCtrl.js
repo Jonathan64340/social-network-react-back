@@ -37,6 +37,22 @@ class Core {
         })
     }
 
+    getDecorateQueryFindOne(collection, query, projection) {
+        return new Promise((resolve, reject) => {
+            if (!collection) return reject();
+            if (!query) return reject();
+
+            collection.findOne(query, projection ? projection : {}, (err, result) => {
+                if (err) return reject(err);
+                if (Object.values(result)[0]) {
+                    resolve(result)
+                } else {
+                    resolve(null)
+                }
+            })
+        })
+    }
+
     jwtDecode(payload) {
         return new Promise((resolve, reject) => {
             if (!payload || !payload.token) return reject('Missing parameter in payload #jwtDecode on coreCtrl.js');

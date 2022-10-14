@@ -101,11 +101,20 @@ router.post('/api/v1/user/edit', Core.authenticateJWT, async function (req, res)
 
 // Media
 router.post('/api/v1/upload', Core.authenticateJWT, async function (req, res) {
-  await Media.upload({ req, res })
-    .then(data => { res.status(200).send(data) })
-    .catch(err => {
-      res.status(500).send(err)
-    })
+  if (req.user) {
+    const userId = Object.entries(req.user)[0][1]
+    if (userId) {
+      await Media.upload({ req, res, userId })
+        .then(data => { res.status(200).send(data) })
+        .catch(err => {
+          res.status(500).send(err)
+        })
+    } else {
+      res.status(403).send('Forbidden')
+    }
+  } else {
+    res.status(403).send('Forbidden')
+  }
 })
 // End media
 

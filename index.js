@@ -15,7 +15,7 @@ const fileUpload = require('express-fileupload');
 const fs = require('fs');
 
 // Cors
-const allowedOrigins = ['https://myun-book.com', 'http://localhost:3000'];
+const allowedOrigins = ['https://chat.myun-book.com', 'http://localhost:3000'];
 
 app.use(cors({
   origin: function (origin, callback) {

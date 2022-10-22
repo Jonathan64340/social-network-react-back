@@ -1,6 +1,6 @@
 {
     "socket-cors-url": [
-        "http://localhost:3000", "http://127.0.0.1:3000", "https://myun-book.com"
+        "http://localhost:3000", "http://127.0.0.1:3000", "https://chat.myun-book.com"
     ],
     "socket-cors-methods": [
         "GET", "POST"
